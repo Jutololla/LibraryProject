@@ -3,6 +3,7 @@ package com.sofkau.library.services;
 import com.sofkau.library.dtos.ResourceDto;
 import com.sofkau.library.models.Resource;
 import com.sofkau.library.repositories.ResourceRepository;
+import com.sofkau.library.utils.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @SpringBootTest
 class ResourceServiceTest {
@@ -61,7 +63,7 @@ class ResourceServiceTest {
         Assertions.assertEquals("R-111", resultado.get(0).getId());
         Assertions.assertEquals("Revista xyz", resultado.get(0).getName());
         Assertions.assertEquals(2, resultado.get(0).getQuantityAvailable());
-        Assertions.assertEquals(null, resultado.get(0).getLoanDate());
+        Assertions.assertNull(resultado.get(0).getLoanDate());
         Assertions.assertEquals(0, resultado.get(0).getQuantityBorrowed());
         Assertions.assertEquals("Revista", resultado.get(0).getType());
         Assertions.assertEquals("Farandula", resultado.get(0).getThematic());
@@ -93,7 +95,7 @@ class ResourceServiceTest {
 
         Assertions.assertEquals("Revista xyz", result.getName());
         Assertions.assertEquals(2, result.getQuantityAvailable());
-        Assertions.assertEquals(null, result.getLoanDate());
+        Assertions.assertNull(result.getLoanDate());
         Assertions.assertEquals(0, result.getQuantityBorrowed());
         Assertions.assertEquals("Revista", result.getType());
         Assertions.assertEquals("Farandula", result.getThematic());
@@ -114,7 +116,22 @@ class ResourceServiceTest {
     }
 
     @Test
+    @DisplayName("getById - success")
     void getById() {
+        String id="R-111";
+        Mockito.when(repository.findById(Mockito.any()))
+                .thenReturn(Optional.of(resources().get(0)));
+        var result=resourceService.getById(id);
+        Assertions.assertEquals(Utils.resourceToDto(resources().get(0)),result);
+    }
+
+    @Test
+    @DisplayName("getById - Failure")
+    void getById_Failure(){
+        String id="11";
+        Mockito.when(repository.findById(Mockito.any()))
+                .thenReturn(Optional.empty());
+        Assertions.assertThrows(NoSuchElementException.class, ()->resourceService.getById(id) );
     }
 
     @Test
